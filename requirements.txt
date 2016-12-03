@@ -1,0 +1,4 @@
+django
+djangorestframework
+pygments
+httpie

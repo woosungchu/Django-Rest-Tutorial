@@ -1,0 +1,11 @@
+#venv
+/rest-venv
+
+#cache
+*.pyc
+__pycache__
+logfile.txt
+
+#db
+db.sqlite3
+.DS_Store
