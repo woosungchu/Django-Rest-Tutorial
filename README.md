@@ -16,8 +16,8 @@
 
 ##2.Requests and responses
 
-JSONResponse(HttpResponse) ->  rest_framework.response.Response
-@csrf_exempt -> @api_view(['GET','POST'])
+JSONResponse(HttpResponse) ->  rest_framework.response.Response__
+@csrf_exempt -> @api_view(['GET','POST'])__
 
 > @api_view(['GET', 'PUT', 'DELETE'])
 > def snippet_detail(request, pk):
