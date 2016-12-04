@@ -16,14 +16,14 @@
 
 ##2.Requests and responses
 
-JSONResponse(HttpResponse) ->  rest_framework.response.Response__
-@csrf_exempt -> @api_view(['GET','POST'])__
+JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
+@csrf_exempt -> @api_view(['GET','POST']) <br/>
 
-> @api_view(['GET', 'PUT', 'DELETE'])
-> def snippet_detail(request, pk):
->     try:
->         snippet = Snippet.objects.get(pk=pk)
->     except Snippet.DoesNotExist:
+> @api_view(['GET', 'PUT', 'DELETE']) <br/>
+> def snippet_detail(request, pk): <br/>
+>     try: <br/>
+>         snippet = Snippet.objects.get(pk=pk) <br/>
+>     except Snippet.DoesNotExist: <br/>
 >         return Response(status=status.HTTP_404_NOT_FOUND)
 >
 >     if request.method == 'GET':
