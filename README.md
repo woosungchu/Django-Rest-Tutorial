@@ -1,7 +1,7 @@
 ##1.Serialization
 <http://www.django-rest-framework.org/tutorial/1-serialization/>
 
-####. Model -> Serializer -> JSONRenderer
+#### Model -> Serializer -> JSONRenderer
 - snippet = Snippet(code='print hello, world')
 - snippet.save()
 - serializer = SnippetSerializer(snippet)
@@ -15,6 +15,40 @@
 - serializer.save()
 
 ##2.Requests and responses
+
+JSONResponse(HttpResponse) ->  rest_framework.response.Response
+@csrf_exempt -> @api_view(['GET','POST'])
+
+> @api_view(['GET', 'PUT', 'DELETE'])
+> def snippet_detail(request, pk):
+>     try:
+>         snippet = Snippet.objects.get(pk=pk)
+>     except Snippet.DoesNotExist:
+>         return Response(status=status.HTTP_404_NOT_FOUND)
+>
+>     if request.method == 'GET':
+>         serializer = SnippetSerializer(snippet)
+>         return Response(serializer.data)
+>
+>     elif request.method == 'PUT':
+>         serializer = SnippetSerializer(snippet, data=request.data)
+>         if serializer.is_valid():
+>             serializer.save()
+>             return Response(serializer.data)
+>         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+>
+>     elif request.method == 'DELETE':
+>         snippet.delete()
+>         return Response(status=status.HTTP_204_NO_CONTENT)
+
+Httpie test request
+- http http://127.0.0.1:8000/snippets/ Accept:application/json  # Request JSON
+- http http://127.0.0.1:8000/snippets/ Accept:text/html         # Request HTML
+- http http://127.0.0.1:8000/snippets.json  # JSON suffix
+- http http://127.0.0.1:8000/snippets.api   # Browsable API suffix
+- http --form POST http://127.0.0.1:8000/snippets/ code="print(123)"
+- http --json POST http://127.0.0.1:8000/snippets/ code="print(456)"
+
 ##3.Class based views
 ##4.Authentication and permissions
 ##5.Relationships and hyperlinked APIs
