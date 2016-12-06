@@ -1,6 +1,4 @@
 ##1.Serialization
-<http://www.django-rest-framework.org/tutorial/1-serialization/>
-
 #### Model -> Serializer -> JSONRenderer
 - snippet = Snippet(code='print hello, world')
 - snippet.save()
@@ -43,7 +41,7 @@ JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-Httpie test request
+####Httpie test request
 - http http://127.0.0.1:8000/snippets/ Accept:application/json  # Request JSON
 - http http://127.0.0.1:8000/snippets/ Accept:text/html         # Request HTML
 - http http://127.0.0.1:8000/snippets.json  # JSON suffix
@@ -52,7 +50,7 @@ Httpie test request
 - http --json POST http://127.0.0.1:8000/snippets/ code="print(456)"
 
 ##3.Class based views
-From @api_view to APIView
+####From @api_view to APIView
 
     from snippets.models import Snippet
     from snippets.serializers import SnippetSerializer
@@ -107,7 +105,7 @@ From @api_view to APIView
         url(r'^snippets/(?P<pk>[0-9]+)/$', views.SnippetDetail.as_view()),
     ]
 
-Using Mixins
+####Using Mixins
 
     from snippets.models import Snippet
     from snippets.serializers import SnippetSerializer
@@ -143,7 +141,7 @@ Using Mixins
         def delete(self,request,*args,**kwargs):
             return self.delete(request,*args,**kwargs)
 
-Using generic class-based views
+####Using generic class-based views
 
     from snippets.models import Snippet
     from snippets.serializers import SnippetSerializer
