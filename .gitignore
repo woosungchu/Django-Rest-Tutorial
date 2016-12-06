@@ -6,6 +6,6 @@
 __pycache__
 logfile.txt
 
-#db
-db.sqlite3
+#db - db.sqlite3 share it for comfort
+#db.sqlite3
 .DS_Store
