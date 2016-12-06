@@ -53,6 +53,7 @@ Httpie test request
 
 ##3.Class based views
 From @api_view to APIView
+
     from snippets.models import Snippet
     from snippets.serializers import SnippetSerializer
     from django.http import Http404
@@ -107,6 +108,7 @@ From @api_view to APIView
     ]
 
 Using Mixins
+
     from snippets.models import Snippet
     from snippets.serializers import SnippetSerializer
     from rest_framework import mixins, generics
@@ -142,6 +144,7 @@ Using Mixins
             return self.delete(request,*args,**kwargs)
 
 Using generic class-based views
+
     from snippets.models import Snippet
     from snippets.serializers import SnippetSerializer
     from rest_framework import generics
