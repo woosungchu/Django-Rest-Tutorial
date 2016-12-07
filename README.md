@@ -156,11 +156,32 @@ JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
         serializer_class = SnippetSerializer
 
 
-
-
-
-
 ##4.Authentication and permissions
+####Add User Serializer and Snippet model attribute
+
+    #snippets/models.py
+    owner = models.ForeignKey('auth.User', related_name='snippets', on_delete=models.CASCADE)
+
+    #snippets/views.py
+    class UserList(generics.ListAPIView):
+    class UserDetail(generics.RetrieveAPIView):
+
+####Associating Snippets With Users
+Right now, if we created a code snippet, there'd be no way of associating the user that created the snippet, with the snippet instance. The user isn't sent as part of the serialized representation, but is instead a property of the incoming request.
+
+The way we deal with that is by overriding a .perform_create() method on our snippet views, that allows us to modify how the instance save is managed, and handle any information that is implicit in the incoming request or requested URL.
+
+    #snippets/views.py
+    class SnippetList(generics.ListCreateAPIView):
+        queryset = Snippet.objects.all()
+        serializer_class = SnippetSerializer
+
+        def perform_create(self,serializer):
+            serializer.save(owner=self.request.user)
+The create() method of our serializer will now be passed an additional 'owner' field, along with the validated data from the request.
+
+
+
 ##5.Relationships and hyperlinked APIs
 ##6.Viewsets and routers
 ##7.Schemas and client libraries
