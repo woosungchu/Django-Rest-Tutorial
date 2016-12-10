@@ -167,9 +167,9 @@ JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
     class UserDetail(generics.RetrieveAPIView):
 
 ####Associating Snippets With Users
-Right now, if we created a code snippet, there'd be no way of associating the user that created the snippet, with the snippet instance. The user isn't sent as part of the serialized representation, but is instead a property of the incoming request.
+Associating the user that created the snippet. The user isn't sent as part of the serialized representation, but is instead a property of the incoming request.
 
-The way we deal with that is by overriding a .perform_create() method on our snippet views, that allows us to modify how the instance save is managed, and handle any information that is implicit in the incoming request or requested URL.
+Overriding a .perform_create() allows us to modify how the instance save is managed, and handle any information that is implicit in the incoming request or requested URL.
 
     #snippets/views.py
     class SnippetList(generics.ListCreateAPIView):
@@ -178,7 +178,31 @@ The way we deal with that is by overriding a .perform_create() method on our sni
 
         def perform_create(self,serializer):
             serializer.save(owner=self.request.user)
+
+    #snippets/serializers.py
+    class SnippetSerializer(serializers.ModelSerializer):
+        owner = serializers.ReadOnlyField(source='owner.username')
+
 The create() method of our serializer will now be passed an additional 'owner' field, along with the validated data from the request.
+
+####Permissions
+
+    #snippets/permissions.py
+    class IsOwnerOrReadOnly(permissions.BasePermission):
+
+        def has_object_permission(self, request, view, obj):
+            # Read permissions are allowed to any request,
+            # so we'll always allow GET, HEAD or OPTIONS requests.
+            if request.method in permissions.SAFE_METHODS:
+                return true
+
+            # Write permissions are only allowed to the owner of the snippet.
+            return obj.owner == requets.user
+
+####Httpie test request
+- http POST http://127.0.0.1:8000/snippets/ code="print(123)"
+- python manage.py createsuperuser
+- http -a tom:password123 POST http://127.0.0.1:8000/snippets/ code="print(789)"
 
 
 
