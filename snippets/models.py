@@ -23,9 +23,9 @@ class Snippet(models.Model):
         ordering = ('created',)
 
     def save(self,*args,**kwargs):
-        lexer =get_lexer_by_name(self.langauge)
-        linenos = self.lineos and 'table' or False
-        options = self.title and {'title' : self.title} or {}
+        lexer =get_lexer_by_name(self.language)
+        linenos = 'table' if self.linenos else False
+        options = {'title' : self.title} if self.title else {}
         formatter = HtmlFormatter(style=self.style, linenos = linenos,
                                     full=True, **options)
         self.highlighted = highlight(self.code, lexer, formatter)
