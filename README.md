@@ -204,8 +204,53 @@ The create() method of our serializer will now be passed an additional 'owner' f
 - python manage.py createsuperuser
 - http -a tom:password123 POST http://127.0.0.1:8000/snippets/ code="print(789)"
 
-
-
 ##5.Relationships and hyperlinked APIs
+
+
+####Reverse Data to Url  
+
+    #snippets/views.py
+    from rest_framework.decorators import api_view
+    from rest_framework.response import Response
+    from rest_framework.reverse import reverse
+
+
+    @api_view(['GET'])
+    def api_root(request, format=None):
+        return Response({
+            'users': reverse('user-list', request=request, format=format),
+            'snippets': reverse('snippet-list', request=request, format=format)
+        })
+
+    #snippets/urls.py
+    url(r'^$', views.api_root),
+
+    #result
+    {
+        "snippets": "http://127.0.0.1:8000/snippets/",
+        "users": "http://127.0.0.1:8000/users/"
+    }
+
+####HyperlinkedAPI Process
+Basically, entities represent relationship with other entity as number of ForeignKey.
+On the contrary to this, HyperlinkedAPI show its url in the form of RESTful API.
+
+    #snippets/views.py
+    class UserSerializer(serializers.HyperlinkedModelSerializer):
+        snippets = serializers.HyperlinkedRelatedField(many=True,view_name="snippet-detail",read_only=True)
+
+    #snippets/urls.py
+    url(r'^snippets/(?P<pk>[0-9]+)/$', views.SnippetDetail.as_view(), name="snippet-detail"),
+
+    #result
+    {
+        "id": 3,
+        "username": "tom",
+        "snippets": [
+            "http://127.0.0.1:8000/snippets/1/",
+            "http://127.0.0.1:8000/snippets/2/"
+        ]
+    }
+
 ##6.Viewsets and routers
 ##7.Schemas and client libraries
