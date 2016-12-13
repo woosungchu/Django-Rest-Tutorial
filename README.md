@@ -185,7 +185,7 @@ Overriding a .perform_create() allows us to modify how the instance save is mana
 
 The create() method of our serializer will now be passed an additional 'owner' field, along with the validated data from the request.
 
-####Permissions
+####You can also customize Permissions
 
     #snippets/permissions.py
     class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -194,10 +194,14 @@ The create() method of our serializer will now be passed an additional 'owner' f
             # Read permissions are allowed to any request,
             # so we'll always allow GET, HEAD or OPTIONS requests.
             if request.method in permissions.SAFE_METHODS:
-                return true
+                return True
 
             # Write permissions are only allowed to the owner of the snippet.
-            return obj.owner == requets.user
+            return obj.owner == request.user
+
+    #snippets/views.py
+    class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+        permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
 ####Httpie test request
 - http POST http://127.0.0.1:8000/snippets/ code="print(123)"
@@ -253,4 +257,78 @@ On the contrary to this, HyperlinkedAPI show its url in the form of RESTful API.
     }
 
 ##6.Viewsets and routers
+
+####Apply Django REST frameworks ViewSets
+
+ViewSets allows the developer to leave the URL construction to be handled automatically, based on common conventions.
+
+    #snippets/views.py
+    #before - User
+    class UserList(generics.ListAPIView):
+        queryset = User.objects.all()
+        serializer_class = UserSerializer
+
+    class UserDetail(generics.RetrieveAPIView):
+        queryset = User.objects.all()
+        serializer_class = UserSerializer
+
+    #after - User
+    class UserViewSet(viewsets.ReadOnlyModelViewSet):
+        queryset = User.objects.all()
+        serializer_class = UserSerializer
+
+
+    #before - Snippet
+    class SnippetList(generics.ListCreateAPIView):
+        queryset = Snippet.objects.all()
+        serializer_class = SnippetSerializer
+        permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+        #Follow related entity along foreignKey
+        def perform_create(self,serializer):
+            serializer.save(owner=self.request.user)
+
+    class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+        queryset = Snippet.objects.all()
+        serializer_class = SnippetSerializer
+        permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly,)
+
+    class SnippetHighlight(generics.GenericAPIView):
+        queryset = Snippet.objects.all()
+        renderer_classes = (renderers.StaticHTMLRenderer,)
+
+        def get(self, request, *args, **kwargs):
+            snippet = self.get_object()
+            return Response(snippet.highlighted)
+
+    #after - Snippet
+    class SnippetViewSet(viewsets.ModelViewSet):
+        queryset = Snippet.objects.all()
+        serializer_class = SnippetSerializer
+        permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+
+        #Follow related entity along foreignKey
+        def perform_create(self, serializer):
+            serializer.save(owner = self.request.user)
+
+        #the name of function would be url /snippet/1/highlight/ (not sure..)
+        @detail_route(renderer_classes = [renderers.StaticHTMLRenderer])
+        def highlight(self, request, *args, **kwargs):
+            snippet = self.get_object()
+            return Response(snippet.highlighted)
+
+####Router also design the URL conf automatically
+
+    # Create a router and register our viewsets with it.
+    router = DefaultRouter()
+    router.register(r'snippets', views.SnippetViewSet)
+    router.register(r'users', views.UserViewSet)
+
+    # The API URLs are now determined automatically by the router.
+    # Additionally, we include the login URLs for the browsable API.
+    urlpatterns = [
+        url(r'^', include(router.urls)),
+        url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    ]
+
 ##7.Schemas and client libraries

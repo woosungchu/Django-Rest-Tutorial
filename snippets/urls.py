@@ -1,10 +1,20 @@
 from django.conf.urls import url, include
-from rest_framework.urlpatterns import format_suffix_patterns
 from snippets import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'snippets', views.SnippetViewSet)
+router.register(r'users', views.UserViewSet)
+
+urlpatterns = [
+    url(r'^', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+]
+
 
 """
-If we're going to have a hyperlinked API, we need to make sure we name our URL patterns.
-"""
+from rest_framework.urlpatterns import format_suffix_patterns
+
 urlpatterns = format_suffix_patterns([
     url(r'^$',views.api_root),
     url(r'^snippets/$', views.SnippetList.as_view(), name="snippet-list"),
@@ -18,3 +28,4 @@ urlpatterns = format_suffix_patterns([
 urlpatterns += [
     url(r'^api-auth/', include('rest_framework.urls',namespace='rest_framework')),
 ]
+"""
