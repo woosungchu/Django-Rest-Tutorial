@@ -1,7 +1,6 @@
 ##1.Serialization
 #### Model -> Serializer -> JSONRenderer
 - snippet = Snippet(code='print hello, world')
-- snippet.save()
 - serializer = SnippetSerializer(snippet)
 - content = JSONRenderer().render(serializer.data)
 
@@ -9,13 +8,9 @@
 - stream = BytesIO(content)
 - data = JSONParser().parse(stream)
 - serializer = SnippetSerializer(data=data)
-- serializer.is_valid()
-- serializer.save()
+- serializer.is_valid() && serializer.save()
 
 ##2.Requests and responses
-
-JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
-@csrf_exempt -> @api_view(['GET','POST']) <br/>
 
     @api_view(['GET', 'PUT', 'DELETE'])
     def snippet_detail(request, pk):
@@ -51,13 +46,6 @@ JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
 
 ##3.Class based views
 ####From @api_view to APIView
-
-    from snippets.models import Snippet
-    from snippets.serializers import SnippetSerializer
-    from django.http import Http404
-    from rest_framework.views import APIView
-    from rest_framework.response import Response
-    from rest_framework import status
 
     class SnippetList(APIView):
         def get(self, request,format=None):
@@ -107,10 +95,6 @@ JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
 
 ####Using Mixins
 
-    from snippets.models import Snippet
-    from snippets.serializers import SnippetSerializer
-    from rest_framework import mixins, generics
-
     class SnippetList(mixins.ListModelMixin,
                         mixins.CreateModelMixin,
                         generics.GenericAPIView):
@@ -142,10 +126,6 @@ JSONResponse(HttpResponse) ->  rest_framework.response.Response <br/>
             return self.delete(request,*args,**kwargs)
 
 ####Using generic class-based views
-
-    from snippets.models import Snippet
-    from snippets.serializers import SnippetSerializer
-    from rest_framework import generics
 
     class SnippetList(generics.ListCreateAPIView):
         queryset = Snippet.objects.all()
@@ -204,7 +184,7 @@ The create() method of our serializer will now be passed an additional 'owner' f
         permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
 ####Httpie test request
-- http POST http://127.0.0.1:8000/snippets/ code="print(123)"
+- http POST http://127.0.0.1:8000/snippets/ code="print(123)" # it will return authentication error
 - python manage.py createsuperuser
 - http -a tom:password123 POST http://127.0.0.1:8000/snippets/ code="print(789)"
 
@@ -214,11 +194,6 @@ The create() method of our serializer will now be passed an additional 'owner' f
 ####Reverse Data to Url  
 
     #snippets/views.py
-    from rest_framework.decorators import api_view
-    from rest_framework.response import Response
-    from rest_framework.reverse import reverse
-
-
     @api_view(['GET'])
     def api_root(request, format=None):
         return Response({
@@ -263,43 +238,10 @@ On the contrary to this, HyperlinkedAPI show its url in the form of RESTful API.
 ViewSets allows the developer to leave the URL construction to be handled automatically, based on common conventions.
 
     #snippets/views.py
-    #before - User
-    class UserList(generics.ListAPIView):
-        queryset = User.objects.all()
-        serializer_class = UserSerializer
-
-    class UserDetail(generics.RetrieveAPIView):
-        queryset = User.objects.all()
-        serializer_class = UserSerializer
-
     #after - User
     class UserViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = User.objects.all()
         serializer_class = UserSerializer
-
-
-    #before - Snippet
-    class SnippetList(generics.ListCreateAPIView):
-        queryset = Snippet.objects.all()
-        serializer_class = SnippetSerializer
-        permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-        #Follow related entity along foreignKey
-        def perform_create(self,serializer):
-            serializer.save(owner=self.request.user)
-
-    class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
-        queryset = Snippet.objects.all()
-        serializer_class = SnippetSerializer
-        permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly,)
-
-    class SnippetHighlight(generics.GenericAPIView):
-        queryset = Snippet.objects.all()
-        renderer_classes = (renderers.StaticHTMLRenderer,)
-
-        def get(self, request, *args, **kwargs):
-            snippet = self.get_object()
-            return Response(snippet.highlighted)
 
     #after - Snippet
     class SnippetViewSet(viewsets.ModelViewSet):
@@ -330,5 +272,3 @@ ViewSets allows the developer to leave the URL construction to be handled automa
         url(r'^', include(router.urls)),
         url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
     ]
-
-##7.Schemas and client libraries
