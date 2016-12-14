@@ -1,3 +1,12 @@
+#Summary
+
+1. @api_view - request.method -- 'GET' / 'PUT' / 'DELETE'
+2. class ModelList/Detail(APIView) - def get/put/delete
+3. Mixins - shorten automatically working logic
+4. class ModelList/Detail(generics.RetrieveUpdateDestroyAPIView) - combine Mixins
+5. class SnippetViewSet(viewsets.ModelViewSet) - combine ModelList and ModelDetail
+
+
 ##1.Serialization
 #### Model -> Serializer -> JSONRenderer
 - snippet = Snippet(code='print hello, world')
